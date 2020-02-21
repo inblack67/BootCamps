@@ -1,7 +1,19 @@
 const express = require('express');
-const {getBootcamps, getBootcamp,createBootcamp, updateBootcamp,deleteBootcamp } = require('../controllers/bootcamps');
+const {
+
+  getBootcamps, 
+  getBootcamp,
+  createBootcamp, 
+  updateBootcamp,
+  deleteBootcamp ,
+  getBootcampsWithinRadius
+
+} = require('../controllers/bootcamps');
 
 const router = express.Router();
+
+router.route('/radius/:zipcode/:distance')
+.get(getBootcampsWithinRadius);
 
 
 router.route('/')
@@ -12,7 +24,6 @@ router.route('/:id')
 .get(getBootcamp)
 .put(updateBootcamp)
 .delete(deleteBootcamp);
-
 
 
 // cmd + d = highlight all the follwing, but one by one.

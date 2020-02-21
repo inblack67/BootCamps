@@ -1,4 +1,7 @@
 const mognoose = require('mongoose');
+const slugify = require('slugify');
+const geocoder = require('../utils/geocoder');
+
 const BootcampSchema = mognoose.Schema({
   name: {
     type: String,
@@ -8,7 +11,7 @@ const BootcampSchema = mognoose.Schema({
     maxLength: [50, 'Name cannot be more than 50 chars']
   },
   slug: String,        
-  // sluggify Development Center = development-center - to be used in the url (ui)
+  // slugify Development Center = development-center - to be used in the url (ui)
   description: {
     type: String,
     required: [true, 'Enter a description please'],
@@ -99,6 +102,35 @@ const BootcampSchema = mognoose.Schema({
   }
 
 });
+
+// slug
+BootcampSchema.pre('save', function(next){
+
+  this.slug =  slugify(this.name, { lower: true });
+  next();
+});
+
+// geocode
+BootcampSchema.pre('save', async function(next) {
+
+  const loc = await geocoder.geocode(this.address);
+
+  this.location = {
+    type: 'Point',
+    coordinates: [loc[0].longitude, loc[0].latitude],
+    formattedAddress: loc[0].formattedAddress,
+    street: loc[0].street,
+    city: loc[0].city,
+    state: loc[0].stateCode,
+    zipcode: loc[0].zipcode,
+    country: loc[0].countryCode
+  }
+
+  // stopping address to get saved in db as we already have formatted add
+  this.address = undefined;
+
+  next();
+})
 
 
 module.exports = mognoose.model('Bootcamp',BootcampSchema);
