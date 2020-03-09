@@ -1,6 +1,7 @@
 const mognoose = require('mongoose');
 const slugify = require('slugify');
 const geocoder = require('../utils/geocoder');
+require('colors');
 
 const BootcampSchema = mognoose.Schema({
   name: {
@@ -101,6 +102,9 @@ const BootcampSchema = mognoose.Schema({
     default: Date.now
   }
 
+}, {
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true }
 });
 
 // slug
@@ -131,6 +135,25 @@ BootcampSchema.pre('save', async function(next) {
 
   next();
 })
+
+// cascade delete
+BootcampSchema.pre('remove', async function (next) {
+
+  console.log(`Courses being deleted from bootcamp with id ${this._id}`.red.bold);
+
+  await this.model('Course').deleteMany({ bootcamp: this._id });
+
+  next();
+})
+
+
+// reverse populate with virtuals
+BootcampSchema.virtual('courses', {
+  ref: 'Course',
+  localField: '_id',
+  foreignField: 'bootcamp',
+  justOne: false
+});
 
 
 module.exports = mognoose.model('Bootcamp',BootcampSchema);

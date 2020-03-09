@@ -6,9 +6,14 @@ const {
   createBootcamp, 
   updateBootcamp,
   deleteBootcamp ,
-  getBootcampsWithinRadius
+  getBootcampsWithinRadius,
+  bootcampPhotoUpload
 
 } = require('../controllers/bootcamps');
+
+const Bootcamp = require('../models/Bootcamp');
+const advancedQueries = require('../middleware/advancedQueries');
+const { protect, authorize } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -23,13 +28,15 @@ router.route('/radius/:zipcode/:distance')
 
 
 router.route('/')
-.get(getBootcamps)
-.post(createBootcamp);
+.get(advancedQueries(Bootcamp, 'courses'), getBootcamps)
+.post(protect, authorize('publisher', 'admin'), createBootcamp);
 
 router.route('/:id')
 .get(getBootcamp)
-.put(updateBootcamp)
-.delete(deleteBootcamp);
+.put(protect, authorize('publisher', 'admin'), updateBootcamp)
+.delete(protect, authorize('publisher', 'admin'), deleteBootcamp);
+
+router.route('/:id/photo').put(protect, authorize('publisher', 'admin'), bootcampPhotoUpload)
 
 
 // cmd + d = highlight all the follwing, but one by one.

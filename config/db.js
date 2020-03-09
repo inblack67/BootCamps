@@ -4,11 +4,11 @@ const connectDB = async () => {
   const connect = await mongoose.connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
     useCreateIndex: true,
-    useFindAndModify: true,
+    useFindAndModify: false,
     useUnifiedTopology: true
   });
 
-  console.log(`Mongo is here : ${connect.connection.host}`.cyan.bold.underline);
+  console.log(`Mongo is here : ${connect.connection.host}`.green.bold);
 }
 
 module.exports = connectDB;
