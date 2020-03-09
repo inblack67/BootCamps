@@ -100,6 +100,11 @@ const BootcampSchema = mognoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now
+  },
+  user: {
+    type: mognoose.Schema.ObjectId,
+    ref: 'User',
+    required: true
   }
 
 }, {
@@ -110,6 +115,7 @@ const BootcampSchema = mognoose.Schema({
 // slug
 BootcampSchema.pre('save', function(next){
 
+  // devcentral-bootcamp
   this.slug =  slugify(this.name, { lower: true });
   next();
 });

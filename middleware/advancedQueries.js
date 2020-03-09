@@ -8,6 +8,8 @@ const advancedQueries = (model, populate) => async (req,res,next) => {
 
   // req.query is an object so stringify needed
   let queryString = JSON.stringify(reqQuery);
+
+  // gt = $gt
   queryString = queryString.replace(/\b(gt|gte|lt|lte|in)\b/g, match => `$${match}`);
 
   let query = model.find(JSON.parse(queryString));
@@ -15,6 +17,7 @@ const advancedQueries = (model, populate) => async (req,res,next) => {
   // select fields - mongoose requires space in between
   if(req.query.select)
   {
+    // select(name x y z) = mongoose differentiate these args by spaces
     const fields = req.query.select.split(',').join(' ');
     query = query.select(fields);
   }
@@ -28,7 +31,7 @@ const advancedQueries = (model, populate) => async (req,res,next) => {
 
   else
   {
-    query = query.sort('-createdAt');
+    query = query.sort('-createdAt'); // desc date
   }
 
   // pagination
