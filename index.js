@@ -15,6 +15,7 @@ const connectDB = require('./config/db');
 const bootcamps = require('./routes/bootcamps');
 const courses = require('./routes/courses');
 const auth = require('./routes/auth');
+const users = require('./routes/users');
 
 // load env vars
 dotenv.config({path: './config/config.env'});
@@ -45,6 +46,7 @@ if(process.env.NODE_ENV === 'development')
 app.use('/api/v1/bootcamps', bootcamps);
 app.use('/api/v1/courses', courses);
 app.use('/api/v1/auth', auth);
+app.use('/api/v1/users', users);
 
 // error middleware
 app.use(errorHandler);

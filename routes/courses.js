@@ -10,6 +10,8 @@ const {
 } = require('../controllers/courses');
 
 const Course = require('../models/Course');
+
+// middlewares
 const advancedQueries = require('../middleware/advancedQueries');
 const { protect, authorize } = require('../middleware/auth');
 

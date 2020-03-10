@@ -66,6 +66,47 @@ exports.getMe = asyncHandler(async (req,res, next) => {
 
 });
 
+// desc Update User
+// @route PUT /api/v1/auth/updatedetails
+// @access private
+exports.updateDetails = asyncHandler(async (req,res, next) => {
+
+  // update name and email
+  const fields = { name: req.body.name, email: req.body.email }
+  const user = await User.findByIdAndUpdate(req.user.id, fields, {
+    new: true,
+    runValidators: true
+  });
+
+  if(!user)
+  {
+    return next(new ErrorResponse('Server Error', 500));
+  }
+
+  res.status(200).json({ success: true, data: user })
+
+});
+
+
+// desc Update Password
+// @route PUT /api/v1/auth/updatepassword
+// @access private
+exports.updatePassword = asyncHandler(async (req,res, next) => {
+
+  const user = await User.findById(req.user).select('+password');
+
+  if(!user.matchPassword(req.body.currentPassword))
+  {
+    return next(new ErrorResponse('Password Incorrect', 401));
+  }
+
+  user.password = req.body.newPassword
+  await user.save();
+
+  res.status(200).json({ success: true, data: user })
+
+});
+
 
 // desc forgot password
 // @route POST /api/v1/auth/forgotpassword

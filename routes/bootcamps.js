@@ -12,6 +12,8 @@ const {
 } = require('../controllers/bootcamps');
 
 const Bootcamp = require('../models/Bootcamp');
+
+// middlewares
 const advancedQueries = require('../middleware/advancedQueries');
 const { protect, authorize } = require('../middleware/auth');
 
