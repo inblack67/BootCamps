@@ -1,6 +1,8 @@
+const crypto = require('crypto');
 const User = require('../models/User');
 const ErrorResponse = require('../utils/errorResponse');
 const asyncHandler = require('../middleware/async');
+const sendMail  = require('../utils/sendMail');
 
 // desc Register a user
 // @route POST /api/v1/auth/register
@@ -61,6 +63,81 @@ exports.getMe = asyncHandler(async (req,res, next) => {
   }
 
   res.status(200).json({ success: true, data: user })
+
+});
+
+
+// desc forgot password
+// @route POST /api/v1/auth/forgotpassword
+// @access public
+exports.forgotPassword = asyncHandler(async (req,res, next) => {
+
+  const user = await User.findOne({ email: req.body.email }); 
+
+  if(!user)
+  {
+    return next(new ErrorResponse('No user with that email exists', 404));
+  }
+
+  // GET reset token
+  const resetToken = user.getResetPasswordToken();
+
+  await user.save({ validateBeforeSave: false });
+
+  // rest url
+  const resetUrl = `${req.protocol}://${req.get('host')}/api/v1/auth/resetpassword/${resetToken}`;
+
+  const message = `This email is sent with respect to the request made by you to reset your password. To do so, you must make a PUT request to ${resetUrl} within the span of 10 minutes`;
+
+  try {
+
+    await sendMail({
+      email: user.email,
+      subject: 'Reset Password Token',
+      message
+    });
+
+    res.status(200).json({ success: true, msg: 'Email sent' })
+
+  } catch (err) {
+
+    console.log(err);
+
+    // what's their use now if the mail was not send?
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpire = undefined;
+
+    return next(new ErrorResponse('Email could not be sent', 500));
+  }
+
+});
+
+// desc Reset Password
+// @route PUT /api/v1/auth/resetpassword/:resetToken
+// @access Public
+exports.resetPassword = asyncHandler(async (req,res, next) => {
+
+  // get hashed token from url
+  const resetPasswordToken  = crypto.createHash('sha256').update(req.params.resetToken).digest('hex');
+  
+  const user = await User.findOne({
+    resetPasswordToken,
+    resetPasswordExpire: { $gt: Date.now() }
+  }); 
+
+  if(!user)
+  {
+    return next(new ErrorResponse('Invalid Token', 400));
+  }
+
+  // set new password
+  user.password = req.body.password;
+  user.resetPasswordToken = undefined;
+  user.resetPasswordExpire = undefined;
+
+  await user.save();
+
+  sendTokenCookie(user, 200, res);
 
 });
 
