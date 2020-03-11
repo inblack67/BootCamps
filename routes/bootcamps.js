@@ -20,9 +20,11 @@ const { protect, authorize } = require('../middleware/auth');
 const router = express.Router();
 
 const courseRouter = require('./courses');
+const reviewRouter = require('./reviews');
 
 // re-route to course router
 router.use('/:bootcampId/courses', courseRouter);
+router.use('/:bootcampId/reviews', reviewRouter);
 
 
 router.route('/radius/:zipcode/:distance')
