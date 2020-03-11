@@ -7,7 +7,12 @@ const errorHandler = require('./middleware/error');
 const fileUpload = require('express-fileupload');
 const cookieParser = require('cookie-parser');
 const path = require('path');
-
+const sanitize = require('express-mongo-sanitize');
+const helmet = require('helmet');
+const xss = require('xss-clean');
+const rateLimit = require('express-rate-limit');
+const hpp = require('hpp');
+const cors = require('cors');
 const connectDB = require('./config/db');
 
 
@@ -27,6 +32,29 @@ const app = express();
 
 // body parser middleware
 app.use(express.json());
+
+// sanitize data
+app.use(sanitize());
+
+// set security headers
+app.use(helmet());
+
+// prevent XSS attacks
+app.use(xss());
+
+// rate limit
+const limiter = rateLimit({
+  windowMs: 10 * 60 * 1000,   // 10 minutes
+  max: 100
+});
+
+app.use(limiter);
+
+// prevent http param pollution
+app.use(hpp());
+
+// enable CORS
+app.use(cors());
 
 // cookie parser middleware
 app.use(cookieParser());
